@@ -4,11 +4,18 @@
     "source": [
         {
             "type": "expression",
-            "value": "https://n.netease.com/forum-74-{range(1,32)}.html"
+            "value": "https://n.netease.com/forum-74-{range}.html",
+            "params": [
+                {
+                    "key": "range",
+                    "type": "python",
+                    "value": "range(1,3)"
+                }
+            ]
         },
         {
             "type": "url",
-            "value": "https://n.netease.com/forum-74-1.html"
+            "value": "https://n.netease.com/forum-main.html"
         }
     ],
     "filter": [
@@ -32,8 +39,9 @@
                     "value": "//tbody"
                 },
                 {
-                    "type": "expression",
-                    "value": "/div[@class='xi2']/text() > 10"
+                    "type": "xpath",
+                    "value": "/div[@class='xi2']/text()",
+                    "expression": "{value} > 10"
                 }
             ],
             "target": [
