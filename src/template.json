@@ -1,0 +1,96 @@
+{
+    "name": "job1",
+    "host": "https://n.netease.com",
+    "sources": [
+        {
+            "type": "expression",
+            "value": "https://n.netease.com/forum-74-{range}.html",
+            "params": [
+                {
+                    "key": "range",
+                    "type": "python",
+                    "value": "range(1,3)"
+                }
+            ]
+        },
+        {
+            "type": "url",
+            "value": "https://n.netease.com/forum-74-3.html"
+        }
+    ],
+    "filters": [
+        {
+            "type": "xpath",
+            "value": "//table[@id='threadlisttableid']"
+        }
+    ],
+    "targets": [
+        {
+            "name": "subjob1",
+            "filters": [
+                {
+                    "type": "xpath",
+                    "value": ".//tbody/tr"
+                },
+                {
+                    "type": "expression",
+                    "value": "int('{p1}') > 20",
+                    "params": [
+                        {
+                            "key": "p1",
+                            "type": "xpath",
+                            "value": ".//td[@class='num']/a[@class='xi2']/text()"
+                        }
+                    ]
+                }
+            ],
+            "targets": [
+                {
+                    "name": "href_page",
+                    "filters": [
+                        {
+                            "type": "xpath",
+                            "value": ".//td[@class='icn']/a/@href"
+                        }
+                    ],
+                    "targets": [
+                        {
+                            "name": "inner_content",
+                            "sources": [{
+                                "type": "expression",
+                                "value": "'{host}'+'/{route}'",
+                                "params": [
+                                    {
+                                        "key": "host",
+                                        "type": "python",
+                                        "value": "this.host"
+                                    },
+                                    {
+                                        "key": "route",
+                                        "type": "python",
+                                        "value": "this.source"
+                                    }
+                                ]
+                            }],
+                            "filters": [
+                                {
+                                    "type": "xpath",
+                                    "value": "(//td[@class='t_f'])[1]/text()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "title",
+                    "filters": [
+                        {
+                            "type": "xpath",
+                            "value": ".//a[@class='s xst']/text()"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

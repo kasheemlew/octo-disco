@@ -1,3 +1,5 @@
+import json
+from abc import ABC, abstractmethod
 from copy import copy
 from typing import List
 
@@ -9,7 +11,7 @@ class SourceHandler:
         del params['type']
         if source_type == 'expression':
             return ExpressionSource(**params)
-        return NormalSource(params)
+        return NormalSource(**params)
 
     @classmethod
     def parse_source(cls, sources):
@@ -18,11 +20,16 @@ class SourceHandler:
             source = cls.get_source(**source_json)
             source.parse()
             results.extend(source.get_vals())
+        with open('result.txt', 'w') as f:
+            f.write(json.dumps(results))
         return results
 
 
-class GeneralSource:
+class GeneralSource(ABC):
+    @abstractmethod
     def parse(self): ...
+
+    @abstractmethod
     def get_vals(self) -> List[str]: ...
 
 
@@ -54,8 +61,12 @@ class ExpressionSource(GeneralSource):
 
 
 class NormalSource(GeneralSource):
-    def __init__(self, value, *args, **kwargs):
+    def __init__(self, value):
+        self.results = []
         self.source = value
 
+    def parse(self):
+        self.results.append(self.source)
+
     def get_vals(self):
-        return [self.source]
+        return self.results
