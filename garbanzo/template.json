@@ -1,14 +1,13 @@
 {
     "name": "job1",
     "host": "https://n.netease.com",
-    "sources": [
+    "source": [
         {
-            "type": "expression",
+            "type": "expr",
             "value": "https://n.netease.com/forum-74-{range}.html",
-            "params": [
+            "param": [
                 {
                     "key": "range",
-                    "type": "python",
                     "value": "range(1,3)"
                 }
             ]
@@ -18,24 +17,27 @@
             "value": "https://n.netease.com/forum-74-3.html"
         }
     ],
-    "filters": [
+    "match": [
         {
             "type": "xpath",
             "value": "//table[@id='threadlisttableid']"
         }
     ],
-    "targets": [
+    "filter": [],
+    "target": [
         {
             "name": "subjob1",
-            "filters": [
+            "match": [
                 {
                     "type": "xpath",
                     "value": ".//tbody/tr"
-                },
+                }
+            ],
+            "filter": [
                 {
-                    "type": "expression",
+                    "type": "expr",
                     "value": "int('{p1}') > 20",
-                    "params": [
+                    "param": [
                         {
                             "key": "p1",
                             "type": "xpath",
@@ -44,22 +46,22 @@
                     ]
                 }
             ],
-            "targets": [
+            "target": [
                 {
                     "name": "href_page",
-                    "filters": [
+                    "match": [
                         {
                             "type": "xpath",
                             "value": ".//td[@class='icn']/a/@href"
                         }
                     ],
-                    "targets": [
+                    "target": [
                         {
                             "name": "inner_content",
-                            "sources": [{
-                                "type": "expression",
+                            "source": [{
+                                "type": "expr",
                                 "value": "'{host}'+'/{route}'",
-                                "params": [
+                                "param": [
                                     {
                                         "key": "host",
                                         "type": "python",
@@ -72,7 +74,7 @@
                                     }
                                 ]
                             }],
-                            "filters": [
+                            "match": [
                                 {
                                     "type": "xpath",
                                     "value": "(//td[@class='t_f'])[1]/text()"
@@ -83,12 +85,15 @@
                 },
                 {
                     "name": "title",
-                    "filters": [
+                    "match": [
                         {
                             "type": "xpath",
                             "value": ".//a[@class='s xst']/text()"
                         }
-                    ]
+                    ],
+                    "store": {
+                        "field": "title"
+                    }
                 }
             ]
         }
