@@ -1,7 +1,9 @@
 import itertools
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from lxml import etree
+
+from garbanzo.node import Node
 
 
 class ExprParser:
@@ -13,7 +15,7 @@ class ExprParser:
         # Parse values
         for p in params:
             if p.get('type') == 'xpath':
-                if not isinstance(this, etree._Element):
+                if not isinstance(this, Node):
                     this = etree.HTML(this)
                 eval_p = this.xpath(p.get('value'))
             else:

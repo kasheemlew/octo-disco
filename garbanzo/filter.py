@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 
-from lxml import etree
-
+from garbanzo.node import Node
 from garbanzo.utils.expression import ExprParser
 
 
@@ -31,7 +30,7 @@ class FilterHandler:
 
 class GeneralFilter(ABC):
     @abstractmethod
-    def do(self, elements: List[etree._Element]): ...
+    def do(self, elements: List[Node]): ...
 
 
 class ExpressionFilter(GeneralFilter):
@@ -40,7 +39,7 @@ class ExpressionFilter(GeneralFilter):
         self.type = 'expr'
         self.params = param
 
-    def do(self, source: List[etree._Element]):
+    def do(self, source: List[Node]):
         result = []
         for elem in source:
             if all(ExprParser.parse(self.value, self.params, elem)):

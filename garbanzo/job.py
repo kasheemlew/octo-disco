@@ -1,8 +1,9 @@
+import asyncio
+import uuid
 from typing import List, Dict
 
-from lxml import etree
-import asyncio
 import aiohttp
+from lxml import etree
 
 from garbanzo.filter import GeneralFilter
 from garbanzo.match import XpathMatch
@@ -12,7 +13,7 @@ from garbanzo.store import MongoStore
 class Job:
     def __init__(
             self,
-            parent: str,
+            parent,
             name: str,
             host: str,
             sources: str,
@@ -31,12 +32,13 @@ class Job:
         self.storage = storage
         self.source = []
         self.result = None
+        self.uuid = uuid.uuid4()
 
     async def run(self):
         await self.parse_source()
         self.match_source()
         self.filter_source()
-        self.store()
+        await self.store()
 
     @staticmethod
     async def fetch(session, data):
@@ -65,12 +67,13 @@ class Job:
             result = f.do(result)
         self.result = result
 
-    def store(self):
+    async def store(self):
         if not self.storage:
             return
         for r in self.result:
-            MongoStore().store(**{
+            await MongoStore().store(**{
                 'parent': self.parent,
                 'name': self.name,
+                'uuid': self.uuid,
                 self.storage.get('field', 'default_field'): r
             })

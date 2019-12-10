@@ -1,18 +1,18 @@
 [[source]]
 name = "pypi"
-url = "https://pypi.douban.com/simple"
+url = "https://mirrors.163.com/pypi/simple/"
 verify_ssl = true
 
 [dev-packages]
+pylint = "*"
+autopep8 = "*"
 
 [packages]
-pylint = "*"
-requests = "*"
+motor = "*"
 lxml = "*"
 aiohttp = "*"
 loguru = "*"
-motor = "*"
-mongoengine = "*"
+aiofiles = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"

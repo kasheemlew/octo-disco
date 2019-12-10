@@ -1,32 +1,33 @@
 import asyncio
-import itertools
 import json
 import os
 
 from garbanzo.filter import FilterHandler
+from garbanzo.job import Job
 from garbanzo.match import MatchHandler
 from garbanzo.source import SourceHandler
-from garbanzo.job import Job
 from garbanzo.utils.expression import ExprParser
 from garbanzo.utils.logger import logger
 
 
 class MainController:
     def __init__(self):
-        self.inputq = asyncio.Queue()
         self.source_handler = SourceHandler()
         self.filter_handler = FilterHandler()
         self.match_handler = MatchHandler()
 
-    def run(self):
-        self.read_template()
-        asyncio.run(self.run_parse_json())
-        asyncio.run(self.run_jobs())
+    async def run(self):
+        self.inputq = asyncio.Queue()
+        await self.read_template()
+        await self.run_parse_json()
+        t = asyncio.create_task(self.run_jobs())
+        await self.inputq.join()
+        t.cancel()
 
-    def read_template(self):
+    async def read_template(self):
         with open(os.path.join(os.path.dirname(__file__), 'template.json')) as json_file:
             data = json.load(json_file)
-        self.inputq.put_nowait(data)
+        await self.inputq.put(data)
 
     async def run_parse_json(self):
         json_data = await self.inputq.get()
@@ -39,20 +40,18 @@ class MainController:
         host = json_data.get('host')
         targets = json_data.get('target', [])
         storage = json_data.get('store', [])
-
-        await self.create_job('', name, host, sources, matches, filters, targets, storage)
+        for source in sources:
+            await self.create_job('', name, host, [source], matches, filters, targets, storage)
+        self.inputq.task_done()
 
     async def create_job(self, parent, name, host, sources, matches, filters, targets, storage):
-        new_job = Job(parent, name, host, sources, matches, filters, targets, storage)
-        await self.inputq.put(new_job)
+        job = Job(parent, name, host, sources, matches, filters, targets, storage)
+        await self.inputq.put(job)
 
-    async def create_sub_job(self, job):
+    async def create_sub_job(self, job: Job):
         for target in job.targets:
             user_defined_source = target.get('source')
-            this = type('this', (), {
-                'source': job.result,
-                'host': target.get('host', job.host),
-            })()
+            this = type('This', (), dict(source=job.result, host=target.get('host', job.host)))()
             if not user_defined_source:
                 sources = job.result
             else:
@@ -62,24 +61,22 @@ class MainController:
                         sources.extend(ExprParser.parse(source['value'], source['param'], this))
                     else:
                         sources.append(source.get('value'))
-
-            await self.create_job(
-                parent=job.name,
-                name=target.get('name', job.name + '1'),
-                host=target.get('host', job.host),
-                sources=sources,
-                matches=self.match_handler.parse_match(target.get('match', [])),
-                filters=self.filter_handler.parse_filter(target.get('filter', [])),
-                targets=target.get('target', []),
-                storage=target.get('store', [])
-            )
+            for source in sources:
+                await self.create_job(
+                    parent=f'{job.name}.{job.uuid}',
+                    name=target.get('name', job.name + '1'),
+                    host=target.get('host', job.host),
+                    sources=[source],
+                    matches=self.match_handler.parse_match(target.get('match', [])),
+                    filters=self.filter_handler.parse_filter(target.get('filter', [])),
+                    targets=target.get('target', []),
+                    storage=target.get('store', [])
+                )
 
     async def run_jobs(self):
         while True:
-            try:
-                job: Job = self.inputq.get_nowait()
-                await job.run()
-                await self.create_sub_job(job)
-                logger.info(f"{job.name}: {job.result}; {job.storage}")
-            except asyncio.QueueEmpty as e:
-                break
+            job: Job = await self.inputq.get()
+            await job.run()
+            await self.create_sub_job(job)
+            self.inputq.task_done()
+            logger.info(f"{job.name}: {job.result}; {job.storage}")

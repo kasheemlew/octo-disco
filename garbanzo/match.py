@@ -2,6 +2,8 @@ from typing import List, Dict
 
 from lxml import etree
 
+from garbanzo.node import Node
+
 
 class MatchHandler:
     @classmethod
@@ -28,10 +30,10 @@ class XpathMatch:
         self.value = value
         self.type = 'xpath'
 
-    def do(self, elements: List[etree._Element]):
+    def do(self, elements: List[Node]):
         result = []
         for elem in elements:
-            if not isinstance(elem, etree._Element):
+            if not isinstance(elem, Node):
                 elem = etree.HTML(elem)
             matched_elems = elem.xpath(self.value)
             # TODO

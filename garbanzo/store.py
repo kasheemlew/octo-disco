@@ -1,12 +1,14 @@
-from mongoengine import StringField, connect, Document
+from motor import motor_asyncio
+
+from garbanzo.utils.logger import logger
 
 
 class MongoStore:
-    def __init__(self):
-        self.db = 'garbanzo_project'
+    def __init__(self, db='garbanzo_project'):
+        client = motor_asyncio.AsyncIOMotorClient('localhost', 27017)
+        db = client[db]
+        self.collection = db['garbanzo']
 
-    def store(self, **kwargs):
-        keys = kwargs.keys()
-        record = type('MongoStoreRecord', (Document,), {k: StringField() for k in keys})(**kwargs)
-        with connect(self.db):
-            record.save()
+    async def store(self, **kwargs):
+        logger.warning('before insert')
+        logger.info(f'result {await self.collection.insert_one(kwargs)}')
