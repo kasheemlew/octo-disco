@@ -26,17 +26,20 @@ class MatchHandler:
 
 
 class XpathMatch:
-    def __init__(self, value: str):
+    def __init__(self, value: str, join: bool = False):
         self.value = value
         self.type = 'xpath'
+        self.join = join
 
     def do(self, elements: List[Node]):
         result = []
         for elem in elements:
             if not isinstance(elem, Node):
                 elem = etree.HTML(elem)
-            matched_elems = elem.xpath(self.value)
-            # TODO
-            if len(matched_elems) > 0:
-                result.extend(elem.xpath(self.value))
+            for e in elem.xpath(self.value):
+                ev = e.strip() if isinstance(e, str) else e
+                if ev:
+                    result.append(ev)
+        if self.join:
+            result = [' '.join(result)]
         return result

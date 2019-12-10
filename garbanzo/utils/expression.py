@@ -20,7 +20,7 @@ class ExprParser:
                 eval_p = this.xpath(p.get('value'))
             else:
                 eval_p = eval(p.get('value'))
-                if hasattr(eval_p, '__iter__'):
+                if hasattr(eval_p, '__iter__') and not isinstance(eval_p, str):
                     eval_p = list(eval_p)
                 if not isinstance(eval_p, list):
                     eval_p = [eval_p]

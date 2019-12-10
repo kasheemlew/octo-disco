@@ -10,5 +10,6 @@ class MongoStore:
         self.collection = db['garbanzo']
 
     async def store(self, **kwargs):
-        logger.warning('before insert')
-        logger.info(f'result {await self.collection.insert_one(kwargs)}')
+        logger.debug(f'started writing {kwargs}')
+        result = await self.collection.insert_one(kwargs)
+        logger.debug(f'finished with id {result.inserted_id}')

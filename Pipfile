@@ -13,6 +13,7 @@ lxml = "*"
 aiohttp = "*"
 loguru = "*"
 aiofiles = "*"
+shortuuid = "*"
 
 [requires]
 python_version = "3.8"

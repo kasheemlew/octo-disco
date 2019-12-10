@@ -63,8 +63,8 @@ class MainController:
                         sources.append(source.get('value'))
             for source in sources:
                 await self.create_job(
-                    parent=f'{job.name}.{job.uuid}',
-                    name=target.get('name', job.name + '1'),
+                    parent=job,
+                    name=target.get('name'),
                     host=target.get('host', job.host),
                     sources=[source],
                     matches=self.match_handler.parse_match(target.get('match', [])),

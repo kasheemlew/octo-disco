@@ -77,9 +77,13 @@
                             "match": [
                                 {
                                     "type": "xpath",
-                                    "value": "(//td[@class='t_f'])[1]/text()"
+                                    "value": "(//td[@class='t_f'])[1]/text()",
+                                    "join": true
                                 }
-                            ]
+                            ],
+                            "store": {
+                                "field": "inner_content"
+                            }
                         }
                     ]
                 },
@@ -88,7 +92,8 @@
                     "match": [
                         {
                             "type": "xpath",
-                            "value": ".//a[@class='s xst']/text()"
+                            "value": ".//a[@class='s xst']/text()",
+                            "join": true
                         }
                     ],
                     "store": {

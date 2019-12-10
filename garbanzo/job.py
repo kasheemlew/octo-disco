@@ -1,5 +1,5 @@
 import asyncio
-import uuid
+import shortuuid
 from typing import List, Dict
 
 import aiohttp
@@ -8,12 +8,13 @@ from lxml import etree
 from garbanzo.filter import GeneralFilter
 from garbanzo.match import XpathMatch
 from garbanzo.store import MongoStore
+from garbanzo.utils.logger import logger
 
 
 class Job:
     def __init__(
             self,
-            parent,
+            parent: 'Job',
             name: str,
             host: str,
             sources: str,
@@ -32,7 +33,7 @@ class Job:
         self.storage = storage
         self.source = []
         self.result = None
-        self.uuid = uuid.uuid4()
+        self.uuid = shortuuid.ShortUUID().random(length=4)
 
     async def run(self):
         await self.parse_source()
@@ -56,24 +57,39 @@ class Job:
             self.source.extend(await asyncio.gather(*tasks))
 
     def match_source(self):
+        logger.debug(f'{self.name}@{self.uuid} started matching')
         result = self.source
         for m in self.matches:
             result = m.do(result)
         self.result = result
+        logger.debug(f'{self.name}@{self.uuid} finished matching')
 
     def filter_source(self):
+        logger.debug(f'{self.name}@{self.uuid} started filtering')
         result = self.result
         for f in self.filters:
             result = f.do(result)
         self.result = result
+        logger.debug(f'{self.name}@{self.uuid} finished filtering')
+
+    def find_ancestors_uuid(self) -> List[str]:
+        logger.debug(f'in progress of find_ancestors_uuid, current {self.uuid}')
+        p = self.parent
+        while p:
+            yield p.uuid
+            p = p.parent
 
     async def store(self):
+        logger.debug(f'{self.name}@{self.uuid} started storing')
         if not self.storage:
             return
         for r in self.result:
+            if not r:
+                continue
             await MongoStore().store(**{
-                'parent': self.parent,
+                'parent': '-'.join(self.find_ancestors_uuid()),
                 'name': self.name,
                 'uuid': self.uuid,
                 self.storage.get('field', 'default_field'): r
             })
+        logger.debug(f'{self.name}@{self.uuid} finished storing')
