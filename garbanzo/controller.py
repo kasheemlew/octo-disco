@@ -1,13 +1,15 @@
 import asyncio
 import json
 import os
+from typing import Dict, Union
 
 from garbanzo.filter import FilterHandler
 from garbanzo.job import Job
+from garbanzo.logger import logger
 from garbanzo.match import MatchHandler
 from garbanzo.source import SourceHandler
+from garbanzo.this import This
 from garbanzo.utils.expression import ExprParser
-from garbanzo.utils.logger import logger
 
 
 class MainController:
@@ -16,22 +18,22 @@ class MainController:
         self.filter_handler = FilterHandler()
         self.match_handler = MatchHandler()
 
-    async def run(self):
+    @staticmethod
+    async def default_req_data() -> Dict[str, Union[str, Dict]]:
+        with open(os.path.join(os.path.dirname(__file__), 'template.json')) as json_file:
+            data = json.load(json_file)
+        return data
+
+    async def run(self, data: Dict[str, Union[str, Dict]] = None) -> None:
         self.inputq = asyncio.Queue()
-        await self.read_template()
-        await self.run_parse_json()
+        if data is None:
+            data = await self.default_req_data()
+        await self.create_init_task(data)
         t = asyncio.create_task(self.run_jobs())
         await self.inputq.join()
         t.cancel()
 
-    async def read_template(self):
-        with open(os.path.join(os.path.dirname(__file__), 'template.json')) as json_file:
-            data = json.load(json_file)
-        await self.inputq.put(data)
-
-    async def run_parse_json(self):
-        json_data = await self.inputq.get()
-
+    async def create_init_task(self, json_data: Dict[str, Union[str, Dict]]) -> None:
         assert 'source' in json_data.keys(), 'json_data has no sources'
         sources = self.source_handler.parse_source(json_data['source'])
         matches = self.match_handler.parse_match(json_data.get('match', []))
@@ -42,16 +44,16 @@ class MainController:
         storage = json_data.get('store', [])
         for source in sources:
             await self.create_job('', name, host, [source], matches, filters, targets, storage)
-        self.inputq.task_done()
 
-    async def create_job(self, parent, name, host, sources, matches, filters, targets, storage):
-        job = Job(parent, name, host, sources, matches, filters, targets, storage)
+    async def create_job(self, *args, **kwargs):
+        job = Job(*args, **kwargs)
         await self.inputq.put(job)
 
-    async def create_sub_job(self, job: Job):
+    async def create_sub_job(self, job: Job) -> None:
+        logger.info(f"Create sub job for {job.name}: {job.result}; {job.storage}")
         for target in job.targets:
             user_defined_source = target.get('source')
-            this = type('This', (), dict(source=job.result, host=target.get('host', job.host)))()
+            this = This(source=job.result, host=target.get('host', job.host))
             if not user_defined_source:
                 sources = job.result
             else:

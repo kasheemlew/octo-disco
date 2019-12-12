@@ -38,7 +38,7 @@ class XpathMatch:
                 elem = etree.HTML(elem)
             for e in elem.xpath(self.value):
                 ev = e.strip() if isinstance(e, str) else e
-                if ev:
+                if ev is not None and len(ev) > 0:
                     result.append(ev)
         if self.join:
             result = [' '.join(result)]

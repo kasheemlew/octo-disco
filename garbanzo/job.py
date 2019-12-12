@@ -1,14 +1,14 @@
 import asyncio
-import shortuuid
 from typing import List, Dict
 
 import aiohttp
+import shortuuid
 from lxml import etree
 
 from garbanzo.filter import GeneralFilter
+from garbanzo.logger import logger
 from garbanzo.match import XpathMatch
 from garbanzo.store import MongoStore
-from garbanzo.utils.logger import logger
 
 
 class Job:
@@ -40,6 +40,7 @@ class Job:
         self.match_source()
         self.filter_source()
         await self.store()
+        logger.debug(f'Job {self.name}@{self.uuid} finished')
 
     @staticmethod
     async def fetch(session, data):
@@ -80,9 +81,10 @@ class Job:
             p = p.parent
 
     async def store(self):
-        logger.debug(f'{self.name}@{self.uuid} started storing')
         if not self.storage:
+            logger.debug(f'{self.name}@{self.uuid} has nothing to store')
             return
+        logger.debug(f'{self.name}@{self.uuid} started storing')
         for r in self.result:
             if not r:
                 continue

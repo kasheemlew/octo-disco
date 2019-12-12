@@ -1,6 +1,6 @@
 from motor import motor_asyncio
 
-from garbanzo.utils.logger import logger
+from garbanzo.logger import logger
 
 
 class MongoStore:
