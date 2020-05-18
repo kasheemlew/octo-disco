@@ -1,0 +1,90 @@
+{
+  "name": "好句子网站爬虫",
+  "host": "https://www.diyijuzi.com",
+  "source": [
+    {
+      "type": "url",
+      "value": "https://www.diyijuzi.com/"
+    }
+  ],
+  "match": [
+    {
+      "type": "xpath",
+      "value": "//div[@class=\"nav_a\"]/a/@href"
+    }
+  ],
+  "filter": [],
+  "target": [
+    {
+      "name": "列表页",
+      "source": [
+        {
+          "type": "expr",
+          "value": "http:{path}",
+          "param": [
+            {
+              "key": "path",
+              "type": "python",
+              "value": "this.source"
+            }
+          ]
+        }
+      ],
+      "match": [
+        {
+          "type": "xpath",
+          "value": "//div[@class=\"list\"]/dl/dt/a/@href"
+        }
+      ],
+      "target": [
+        {
+          "name": "好句子",
+          "match": [
+            {
+              "name": "title",
+              "type": "xpath",
+              "value": "//h1/text()",
+              "index": 0
+            },
+            {
+              "name": "author",
+              "type": "xpath",
+              "value": "//div[@class=\"info\"]/span/strong/text()",
+              "index": 0
+            },
+            {
+              "name": "content",
+              "type": "xpath",
+              "value": "//div[@class=\"con\"]/p/text()",
+              "join": true
+            },
+            {
+              "name": "ts",
+              "type": "xpath",
+              "value": "//*[@id=\"article_article\"]/div[3]/div[1]/div[1]/span[3]/text()[2]",
+              "index": 0
+            }
+          ],
+          "store": [
+            {
+              "name": "title",
+              "field": "title"
+            },
+            {
+              "name": "author",
+              "field": "author"
+            },
+            {
+              "name": "content",
+              "field": "content"
+            },
+            {
+              "name": "ts",
+              "field": "ts"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

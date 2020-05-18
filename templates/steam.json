@@ -1,0 +1,219 @@
+{
+    "name": "Steam & GAME STATS",
+    "host": "https://store.steampowered.com/",
+    "cookies": {
+        "wants_mature_content": "1",
+        "steamCountry": "HK%7Cc28639ca7042218f3e5c69287ab6a657",
+        "birthtime": "723744001",
+        "lastagecheckage": "8-0-1993"
+    },
+    "timeout": 10,
+    "source": [
+        {
+            "type": "url",
+            "value": "https://store.steampowered.com/stats/"
+        }
+    ],
+    "match": [
+        {
+            "type": "xpath",
+            "value": "//tr[@class=\"player_count_row\"]"
+        }
+    ],
+    "target": [
+        {
+            "name": "row",
+            "match": [
+                {
+                    "name": "url",
+                    "type": "xpath",
+                    "value": ".//a/@href"
+                },
+                {
+                    "name": "cp",
+                    "type": "xpath",
+                    "value": "./td[1]/span/text()"
+                },
+                {
+                    "name": "dp",
+                    "type": "xpath",
+                    "value": "./td[2]/span/text()"
+                },
+                {
+                    "name": "gname",
+                    "type": "xpath",
+                    "value": ".//a/text()"
+                }
+            ],
+            "target": [
+                {
+                    "name": "Steam & GAME STATS Detail",
+                    "source": [
+                        {
+                            "type": "expr",
+                            "value": "{path}",
+                            "param": [
+                                {
+                                    "key": "path",
+                                    "type": "python",
+                                    "value": "this.parent.values['url']"
+                                }
+                            ]
+                        }
+                    ],
+                    "match": [
+                        {
+                            "name": "cp",
+                            "type": "expr",
+                            "value": "'{path}'",
+                            "param": [
+                                {
+                                    "key": "path",
+                                    "type": "python",
+                                    "value": "this.parent.values['cp']"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "dp",
+                            "type": "expr",
+                            "value": "'{path}'",
+                            "param": [
+                                {
+                                    "key": "path",
+                                    "type": "python",
+                                    "value": "this.parent.values['dp']"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "gname",
+                            "type": "expr",
+                            "value": "'{path}'",
+                            "param": [
+                                {
+                                    "key": "path",
+                                    "type": "python",
+                                    "value": "this.parent.values['gname']"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "url",
+                            "type": "expr",
+                            "value": "'{path}'",
+                            "param": [
+                                {
+                                    "key": "path",
+                                    "type": "python",
+                                    "value": "this.parent.values['url']"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "desc",
+                            "type": "xpath",
+                            "value": "//div[@class='game_description_snippet']/text()"
+                        },
+                        {
+                            "name": "recrev",
+                            "type": "xpath",
+                            "value": "//div[@class='user_reviews_summary_row'][1]/div[@class='summary column']/span[contains(@class, 'game_review_summary')]/text()"
+                        },
+                        {
+                            "name": "recrev_num",
+                            "type": "xpath",
+                            "value": "//div[@class='user_reviews_summary_row'][1]/div[@class='summary column']/span[@class='responsive_hidden']/text()"
+                        },
+                        {
+                            "name": "allrev",
+                            "type": "xpath",
+                            "value": "//div[@class='user_reviews_summary_row'][2]/div[@class='summary column']/span[contains(@class, 'game_review_summary')]/text()"
+                        },
+                        {
+                            "name": "allrev_num",
+                            "type": "xpath",
+                            "value": "//div[@class='user_reviews_summary_row'][2]/div[@class='summary column']/span[@class='responsive_hidden']/text()"
+                        },
+                        {
+                            "name": "pubdate",
+                            "type": "xpath",
+                            "value": "//div[@class='date']/text()"
+                        },
+                        {
+                            "name": "dever",
+                            "type": "xpath",
+                            "value": "//div[@id='developers_list']/a/text()"
+                        },
+                        {
+                            "name": "puber",
+                            "type": "xpath",
+                            "value": "//div[@class='dev_row'][2]/a/text()"
+                        },
+                        {
+                            "name": "tags",
+                            "type": "xpath",
+                            "value": "//div[@class='glance_tags popular_tags']/a/text()",
+                            "join": true,
+                            "joiner": ";"
+                        }
+                    ],
+                    "store": [
+                        {
+                            "name": "cp",
+                            "field": "当前玩家数"
+                        },
+                        {
+                            "name": "dp",
+                            "field": "今日峰值"
+                        },
+                        {
+                            "name": "url",
+                            "field": "URL"
+                        },
+                        {
+                            "name": "gname",
+                            "field": "游戏名"
+                        },
+                        {
+                            "name": "desc",
+                            "field": "游戏简介"
+                        },
+                        {
+                            "name": "recrev",
+                            "field": "近期测评"
+                        },
+                        {
+                            "name": "recrev_num",
+                            "field": "近期测评数"
+                        },
+                        {
+                            "name": "allrev",
+                            "field": "全部测评"
+                        },
+                        {
+                            "name": "allrev_num",
+                            "field": "全部测评数"
+                        },
+                        {
+                            "name": "pubdate",
+                            "field": "发行日期"
+                        },
+                        {
+                            "name": "dever",
+                            "field": "开发商"
+                        },
+                        {
+                            "name": "puber",
+                            "field": "发行商"
+                        },
+                        {
+                            "name": "tags",
+                            "field": "标签"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

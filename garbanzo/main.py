@@ -1,11 +1,14 @@
+import sys
+import os
+
 import asyncio
+from loguru import logger
 
 from garbanzo.controller import MainController
-from garbanzo.logger import logger
 
 if __name__ == '__main__':
+    logger.remove()
+    logger.add(sys.stderr, level=os.environ.get("LOGLEVEL", "INFO"))
+
     controller = MainController()
-    try:
-        asyncio.run(controller.run())
-    except KeyboardInterrupt:
-        logger.info('interrupted by keyboard')
+    asyncio.run(controller.run())

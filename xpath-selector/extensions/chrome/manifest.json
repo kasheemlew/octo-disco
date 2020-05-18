@@ -1,0 +1,25 @@
+{
+    "name": "xpath-selector",
+    "version": "1.0",
+    "description": "xxx chrome extension",
+    "permissions": [
+        "storage",
+        "declarativeContent",
+        "activeTab"
+    ],
+    "background": {
+        "scripts": [
+            "dist/background.js"
+        ],
+        "persistent": false
+    },
+    "browser_action": {},
+    "content_scripts": [
+        { 
+            "matches": ["<all_urls>"],
+            "js": ["dist/content.js"]
+        }
+    ],
+    "options_page": "static/html/options.html",
+    "manifest_version": 2
+}

@@ -1,11 +1,12 @@
 [[source]]
 name = "pypi"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+url = "https://mirrors.163.com/pypi/simple"
 verify_ssl = true
 
 [dev-packages]
 pylint = "*"
 autopep8 = "*"
+mypy = "*"
 
 [packages]
 motor = "*"
@@ -14,7 +15,6 @@ aiohttp = "*"
 loguru = "*"
 aiofiles = "*"
 shortuuid = "*"
-aiofiles38 = "*"
 
 [requires]
 python_version = "3.8"
